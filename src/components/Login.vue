@@ -22,16 +22,53 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script>
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+    };
+  },
+  methods: {
+    async login() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',  // This allows cookies or credentials to be sent
+          body: JSON.stringify({
+            email: this.email,
+            password: this.password,
+          }),
+        });
 
-const email = ref('');
-const password = ref('');
+        // Check the raw response for debugging purposes
+        const data = await response.json();
+        console.log('Response from backend:', data);
 
-const login = () => {
-  console.log('Logging in with:', email.value, password.value);
+        if (response.ok && data.role) {
+          alert('Login successful!');
+          this.$emit('login', { role: data.role }); // ✅ emit role in a user-like object
+        } else {
+          console.error('Login failed:', data);
+          alert(data.error || 'Login failed.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Something went wrong.');
+      }
+    }
+  },
 };
 </script>
+
+
+
+
+
 
 <style scoped>
 .login-page {
